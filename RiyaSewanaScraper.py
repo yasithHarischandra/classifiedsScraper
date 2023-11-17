@@ -4,9 +4,10 @@ import ClassifiedSiteScraper
 import vehicles
 
 class RiyaSewanaScraper(ClassifiedSiteScraper.ClassifiedSiteScraper):
+        siteUrl = 'https://riyasewana.com/search'
         def __init__(self):
                 super().__init__()
-                self.siteUrl = 'https://riyasewana.com/search'
+                
                 
 
         def extractVehicleData(self, singleAdPageUrl):
@@ -79,8 +80,6 @@ class RiyaSewanaScraper(ClassifiedSiteScraper.ClassifiedSiteScraper):
                 return aVehicle
 
                 
-
-
         def findVehicleType(detailString):
                 vType = ''
                 if ' Car ' in detailString:
@@ -158,3 +157,4 @@ class RiyaSewanaScraper(ClassifiedSiteScraper.ClassifiedSiteScraper):
                 while page != None:
                         self.browseAdListPage(page)
                         page = self.getNextAdListPage(page)
+        

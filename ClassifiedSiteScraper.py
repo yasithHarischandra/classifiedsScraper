@@ -1,7 +1,8 @@
 
 class ClassifiedSiteScraper:
+        siteUrl = ''
         def __init__(self):
-                self.siteUrl = ''
+                
                 self.myVehicles = []
 
         def findVehicleType(detailString):
@@ -27,11 +28,6 @@ class ClassifiedSiteScraper:
                 return None
 
         #go through the entire site and pull all the ads
-        def traverseSite():
-                
-                #start with first page
-                page = ClassifiedSiteScraper.siteUrl
-                while page != None:
-                        ClassifiedSiteScraper.browseAdListPage(page)
-                        page = ClassifiedSiteScraper.getNextAdListPage(page)
+        def traverseSite(self):
+                pass
         

@@ -1,10 +1,13 @@
 from bs4 import BeautifulSoup
 from urllib.request import urlopen
 import ClassifiedSiteScraper
+import vehicles
 
 class RiyaSewanaScraper(ClassifiedSiteScraper.ClassifiedSiteScraper):
         def __init__(self):
+                super().__init__()
                 self.siteUrl = 'https://riyasewana.com/search'
+                
 
         def extractVehicleData(self, singleAdPageUrl):
                 singleAdPage = urlopen(singleAdPageUrl)
@@ -24,9 +27,9 @@ class RiyaSewanaScraper(ClassifiedSiteScraper.ClassifiedSiteScraper):
                         return leftProperty, rightProperty
                 
                 print()
-                print(singleAdPageUrl)
-                print(singleAdSoup.h1.text)
-                print(singleAdSoup.h2.text)
+                #print(singleAdPageUrl)
+                #print(singleAdSoup.h1.text)
+                #print(singleAdSoup.h2.text)
                 vehicleType = RiyaSewanaScraper.findVehicleType(singleAdSoup.h1.text)
                 adPostDate = RiyaSewanaScraper.findAdDate(singleAdSoup.h2.text)
                 adCity = RiyaSewanaScraper.findAdCity(singleAdSoup.h2.text)
@@ -59,18 +62,21 @@ class RiyaSewanaScraper(ClassifiedSiteScraper.ClassifiedSiteScraper):
                     options, engineCC =  getRowProperties(makeRowIndex := makeRowIndex+1)
                     details, _ =  getRowProperties(makeRowIndex := makeRowIndex+1, getLeftnRight=False)
                 
+                aVehicle = vehicles.Vehicle(vehicleType, make, model, yom, mileage, singleAdPageUrl, gear, fuelType, engineCC, options, details, adPostDate, adCity, price, contact) 
                 
 
-                print(vehicleType)
-                print(adPostDate)
-                print(adCity)
-                print("make =", make)
-                print("model =", model)
-                print("YoM =", yom)
-                print("Mileage =", mileage)
-                print("Price =", price)
-                print("Contact =", contact)
-                print("Details =", details)
+                #print(vehicleType)
+                #print(adPostDate)
+                #print(adCity)
+                #print("make =", make)
+                #print("model =", model)
+                #print("YoM =", yom)
+                #print("Mileage =", mileage)
+                #print("Price =", price)
+                #print("Contact =", contact)
+                #print("Details =", details)
+
+                return aVehicle
 
                 
 
@@ -136,7 +142,9 @@ class RiyaSewanaScraper(ClassifiedSiteScraper.ClassifiedSiteScraper):
                         singlePageLink = tag.find('a')
                         pageURL = singlePageLink.get('href')
 
-                        self.extractVehicleData(pageURL)
+                        aVehicle = self.extractVehicleData(pageURL)
+                        self.myVehicles.append(aVehicle)
+                        print(aVehicle)
                         #break
         
         def getNextAdListPage(self, currentpageUrl):

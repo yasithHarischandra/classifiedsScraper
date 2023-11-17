@@ -1,10 +1,8 @@
-from bs4 import BeautifulSoup
-from urllib.request import urlopen
-import vehicles
 
 class ClassifiedSiteScraper:
         def __init__(self):
                 self.siteUrl = ''
+                self.myVehicles = []
 
         def findVehicleType(detailString):
                 pass
@@ -28,6 +26,7 @@ class ClassifiedSiteScraper:
         def getNextAdListPage(currentpageUrl):
                 return None
 
+        #go through the entire site and pull all the ads
         def traverseSite():
                 
                 #start with first page

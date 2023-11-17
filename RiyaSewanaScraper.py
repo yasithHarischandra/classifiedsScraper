@@ -13,55 +13,79 @@ class RiyaSewanaScraper(ClassifiedSiteScraper.ClassifiedSiteScraper):
                 #print(singleAdSoup.get_text())
                 dataTable = singleAdSoup.find('table')
                 tableRows = dataTable.find_all('tr')
+
+                # returns the two values in a single row
+                def getRowProperties(rowindex):
+                        cells = tableRows[rowindex].find_all('td')
+                        leftProperty = cells[1].text
+                        rightProperty = cells[3].text
+                        return leftProperty, rightProperty
                 
                 print()
                 print(singleAdPageUrl)
                 print(singleAdSoup.h1.text)
                 print(singleAdSoup.h2.text)
-                print(RiyaSewanaScraper.findAdDate(singleAdSoup.h2.text))
-                print(RiyaSewanaScraper.findAdCity(singleAdSoup.h2.text))
+                vehicleType = RiyaSewanaScraper.findVehicleType(singleAdSoup.h1.text)
+                adPostDate = RiyaSewanaScraper.findAdDate(singleAdSoup.h2.text)
+                adCity = RiyaSewanaScraper.findAdCity(singleAdSoup.h2.text)
+                contact, price = getRowProperties(2)
+                makeRowIndex = 4
+                yomRowIndex = makeRowIndex + 1
+                gearRowIndex = yomRowIndex + 1
+                if(vehicleType == 'heavyduty' or vehicleType == 'tractor'):
+                    makeRowIndex = makeRowIndex - 1
+                    yomRowIndex = yomRowIndex - 1
+                    yomRowIndex = yomRowIndex - 1
                 
-                #Find make and model
-                makeAndModelCells = tableRows[4].find_all('td')
-                print("make =", makeAndModelCells[1].text)
-                print("model =", makeAndModelCells[3].text)
-                makeAndModelCells = tableRows[5].find_all('td')
-                print("YoM =", makeAndModelCells[1].text)
-                print("Mileage =", makeAndModelCells[3].text)
-                makeAndModelCells = tableRows[2].find_all('td')
-                print("Price =", makeAndModelCells[3].text)
-                print("Contact =", makeAndModelCells[1].text)
+                make, model = getRowProperties(makeRowIndex)
+                yom, mileage = getRowProperties(makeRowIndex+1)
+                gear, fuelType = getRowProperties(makeRowIndex+2)
+                
+
+                print(vehicleType)
+                print(adPostDate)
+                print(adCity)
+                print("make =", make)
+                print("model =", model)
+                print("YoM =", yom)
+                print("Mileage =", mileage)
+                print("Price =", price)
+                print("Contact =", contact)
+
+                
+
 
         def findVehicleType(detailString):
                 vType = ''
-                if 'Car' in detailString:
+                if ' Car ' in detailString:
                         vType = 'car'
-                elif 'Motorbike' in detailString:
+                elif ' Motorbike ' in detailString:
                         vType = 'motorbike'
-                elif 'Three Wheel' in detailString:
+                elif ' Three Wheel ' in detailString:
                         vType = 'threewheel'
-                elif 'Van' in detailString:
+                elif ' Van ' in detailString:
                         vType = 'van'
-                elif 'SUV' in detailString:
+                elif ' SUV ' in detailString:
                         vType = 'suv'
-                elif 'Lorry' in detailString:
+                elif ' Lorry ' in detailString:
                         vType = 'lorry'
-                elif 'Tractor' in detailString:
+                elif ' Tractor ' in detailString:
                         vType = 'tractor'
-                elif 'Crew Cab' in detailString:
+                elif ' Crew Cab ' in detailString:
                         vType = 'crewcab'
-                elif 'Pickup' in detailString:
+                elif ' Pickup ' in detailString:
                         vType = 'pickup'
-                elif 'Bus' in detailString:
+                elif ' Bus ' in detailString:
                         vType = 'bus'
-                elif 'Bicycle' in detailString:
+                elif ' Bicycle ' in detailString:
                         vType = 'bicycle'
-                elif 'Heavy-Duty' in detailString:
+                elif ' Heavy-Duty ' in detailString:
                         vType = 'heavyduty'
-                elif 'Other' in detailString:
+                elif ' Other ' in detailString:
                         vType = 'other'
                 else:
                         vType = 'other'
+                return vType
 
         #Find the date ad was posted
         def findAdDate(detailString):

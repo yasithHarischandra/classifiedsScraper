@@ -21,11 +21,10 @@ class ClassifiedSiteScraper:
         def extractVehicleData(singleAdPageUrl):
                 pass
 
+        # this function goes through the list of ads in the page
+        # and returns the URL of next ad list page
         def browseAdListPage(adListPageUrl):
                 pass
-
-        def getNextAdListPage(currentpageUrl):
-                return None
 
         #go through the entire site and pull all the ads
         def traverseSite(self):

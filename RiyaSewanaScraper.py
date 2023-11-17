@@ -129,6 +129,7 @@ class RiyaSewanaScraper(ClassifiedSiteScraper.ClassifiedSiteScraper):
                 return town
 
         # this function goes through the list of ads in the page
+        # and returns the URL of next ad list page
         def browseAdListPage(self, adListPageUrl):
 
                 #first open the page,
@@ -144,17 +145,21 @@ class RiyaSewanaScraper(ClassifiedSiteScraper.ClassifiedSiteScraper):
                         aVehicle = self.extractVehicleData(pageURL)
                         self.myVehicles.append(aVehicle)
                         print(aVehicle)
-                        #break
-        
-        def getNextAdListPage(self, currentpageUrl):
-                return None
+                        break
 
+                #Find the next page
+                nextTag = soup.find('a', string="Next")
+                nextURL = None
+                if nextTag:
+                       nextURL = "https:" + nextTag['href']
+                return nextURL
+        
         #go through the entire site and pull all the ads
         def traverseSite(self):
                 
                 #start with first page
                 page = self.siteUrl
                 while page != None:
-                        self.browseAdListPage(page)
-                        page = self.getNextAdListPage(page)
+                        page = self.browseAdListPage(page)
+                        
         

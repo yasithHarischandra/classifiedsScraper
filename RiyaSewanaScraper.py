@@ -8,17 +8,19 @@ class RiyaSewanaScraper(ClassifiedSiteScraper.ClassifiedSiteScraper):
 
         def extractVehicleData(self, singleAdPageUrl):
                 singleAdPage = urlopen(singleAdPageUrl)
-                singleAdHtml = singleAdPage.read().decode("utf-8")
+                singleAdHtml = singleAdPage.read().decode("utf-8", 'replace')
                 singleAdSoup = BeautifulSoup(singleAdHtml, "html.parser")
                 #print(singleAdSoup.get_text())
                 dataTable = singleAdSoup.find('table')
                 tableRows = dataTable.find_all('tr')
 
                 # returns the two values in a single row
-                def getRowProperties(rowindex):
+                def getRowProperties(rowindex, getLeftnRight = True):
                         cells = tableRows[rowindex].find_all('td')
                         leftProperty = cells[1].text
-                        rightProperty = cells[3].text
+                        rightProperty = ''
+                        if getLeftnRight:
+                            rightProperty = cells[3].text
                         return leftProperty, rightProperty
                 
                 print()
@@ -29,17 +31,34 @@ class RiyaSewanaScraper(ClassifiedSiteScraper.ClassifiedSiteScraper):
                 adPostDate = RiyaSewanaScraper.findAdDate(singleAdSoup.h2.text)
                 adCity = RiyaSewanaScraper.findAdCity(singleAdSoup.h2.text)
                 contact, price = getRowProperties(2)
+
+                #We do not want bicycles:
+                if vehicleType == 'bicycle':
+                    return None
+                
                 makeRowIndex = 4
-                yomRowIndex = makeRowIndex + 1
-                gearRowIndex = yomRowIndex + 1
-                if(vehicleType == 'heavyduty' or vehicleType == 'tractor'):
-                    makeRowIndex = makeRowIndex - 1
-                    yomRowIndex = yomRowIndex - 1
-                    yomRowIndex = yomRowIndex - 1
+                # need to optimise below line
+                # if "Get Leasing" in dataTable: makeRowIndex -= 1
+                if vehicleType == 'heavyduty' or vehicleType == 'tractor' or vehicleType == 'lorry' or vehicleType == 'other' or vehicleType == 'crewcab' or vehicleType == 'bus':
+                    makeRowIndex -= 1
                 
                 make, model = getRowProperties(makeRowIndex)
-                yom, mileage = getRowProperties(makeRowIndex+1)
-                gear, fuelType = getRowProperties(makeRowIndex+2)
+                yom, mileage = getRowProperties(makeRowIndex := makeRowIndex+1)
+                engineCC = '' 
+                startType = ''
+                gear = ''
+                fuelType = ''
+                options = ''
+                details = ''
+
+                if vehicleType == 'motorbike':
+                    engineCC, startType = getRowProperties(makeRowIndex := makeRowIndex+1)
+                    details, _ =  getRowProperties(makeRowIndex := makeRowIndex+2, getLeftnRight=False)
+                else:
+                    gear, fuelType = getRowProperties(makeRowIndex := makeRowIndex+1)
+                    options, engineCC =  getRowProperties(makeRowIndex := makeRowIndex+1)
+                    details, _ =  getRowProperties(makeRowIndex := makeRowIndex+1, getLeftnRight=False)
+                
                 
 
                 print(vehicleType)
@@ -51,6 +70,7 @@ class RiyaSewanaScraper(ClassifiedSiteScraper.ClassifiedSiteScraper):
                 print("Mileage =", mileage)
                 print("Price =", price)
                 print("Contact =", contact)
+                print("Details =", details)
 
                 
 
@@ -108,7 +128,7 @@ class RiyaSewanaScraper(ClassifiedSiteScraper.ClassifiedSiteScraper):
 
                 #first open the page,
                 page = urlopen(adListPageUrl)
-                html = page.read().decode("utf-8")
+                html = page.read().decode("utf-8",'ignore')
                 soup = BeautifulSoup(html, "html.parser")
 
                 #now find the table of ads and iterate through it
@@ -117,7 +137,7 @@ class RiyaSewanaScraper(ClassifiedSiteScraper.ClassifiedSiteScraper):
                         pageURL = singlePageLink.get('href')
 
                         self.extractVehicleData(pageURL)
-                        break
+                        #break
         
         def getNextAdListPage(self, currentpageUrl):
                 return None

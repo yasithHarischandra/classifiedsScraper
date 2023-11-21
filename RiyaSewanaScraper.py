@@ -1,12 +1,13 @@
 from bs4 import BeautifulSoup
 from urllib.request import urlopen
+from datetime import datetime, timedelta, date
 import ClassifiedSiteScraper
 import vehicles
 
 class RiyaSewanaScraper(ClassifiedSiteScraper.ClassifiedSiteScraper):
         siteUrl = 'https://riyasewana.com/search'
-        def __init__(self):
-                super().__init__()
+        def __init__(self, dataSource):
+                super().__init__(dataSource)
                 
                 
 
@@ -27,7 +28,7 @@ class RiyaSewanaScraper(ClassifiedSiteScraper.ClassifiedSiteScraper):
                             rightProperty = cells[3].text
                         return leftProperty, rightProperty
                 
-                print()
+                #print()
                 #print(singleAdPageUrl)
                 #print(singleAdSoup.h1.text)
                 #print(singleAdSoup.h2.text)
@@ -37,14 +38,18 @@ class RiyaSewanaScraper(ClassifiedSiteScraper.ClassifiedSiteScraper):
                 contact, price = getRowProperties(2)
 
                 #We do not want bicycles:
-                if vehicleType == 'bicycle':
+                if vehicleType == 'bicycle' or vehicleType == 'heavyduty':
                     return None
                 
                 makeRowIndex = 4
-                # need to optimise below line
-                # if "Get Leasing" in dataTable: makeRowIndex -= 1
-                if vehicleType == 'heavyduty' or vehicleType == 'tractor' or vehicleType == 'lorry' or vehicleType == 'other' or vehicleType == 'crewcab' or vehicleType == 'bus':
-                    makeRowIndex -= 1
+
+                #Check if the 5th row is leasing ad, if it is not, data starts from 4th row
+                fifthRowLabel, _ =  getRowProperties(makeRowIndex, getLeftnRight=False)
+                if fifthRowLabel != 'Get Leasing':
+                       makeRowIndex -= 1
+                
+                #if vehicleType == 'heavyduty' or vehicleType == 'tractor' or vehicleType == 'lorry' or vehicleType == 'other' or vehicleType == 'crewcab' or vehicleType == 'bus':
+                #    makeRowIndex -= 1
                 
                 make, model = getRowProperties(makeRowIndex)
                 yom, mileage = getRowProperties(makeRowIndex := makeRowIndex+1)
@@ -63,7 +68,7 @@ class RiyaSewanaScraper(ClassifiedSiteScraper.ClassifiedSiteScraper):
                     options, engineCC =  getRowProperties(makeRowIndex := makeRowIndex+1)
                     details, _ =  getRowProperties(makeRowIndex := makeRowIndex+1, getLeftnRight=False)
                 
-                aVehicle = vehicles.Vehicle(vehicleType, make, model, yom, mileage, singleAdPageUrl, gear, fuelType, engineCC, options, details, adPostDate, adCity, price, contact) 
+                aVehicle = vehicles.Vehicle(vehicleType, make, model, yom, mileage, singleAdPageUrl, gear, fuelType, engineCC, startType, options, details, adPostDate, adCity, price, contact) 
                 
 
                 #print(vehicleType)
@@ -82,8 +87,12 @@ class RiyaSewanaScraper(ClassifiedSiteScraper.ClassifiedSiteScraper):
                 
         def findVehicleType(detailString):
                 vType = ''
-                if ' Car ' in detailString:
-                        vType = 'car'
+                if ' Heavy-Duty ' in detailString:
+                        vType = 'heavyduty'
+                elif ' Lorry ' in detailString:
+                        vType = 'lorry'
+                elif ' Tractor ' in detailString:
+                        vType = 'tractor'
                 elif ' Motorbike ' in detailString:
                         vType = 'motorbike'
                 elif ' Three Wheel ' in detailString:
@@ -92,10 +101,6 @@ class RiyaSewanaScraper(ClassifiedSiteScraper.ClassifiedSiteScraper):
                         vType = 'van'
                 elif ' SUV ' in detailString:
                         vType = 'suv'
-                elif ' Lorry ' in detailString:
-                        vType = 'lorry'
-                elif ' Tractor ' in detailString:
-                        vType = 'tractor'
                 elif ' Crew Cab ' in detailString:
                         vType = 'crewcab'
                 elif ' Pickup ' in detailString:
@@ -104,8 +109,8 @@ class RiyaSewanaScraper(ClassifiedSiteScraper.ClassifiedSiteScraper):
                         vType = 'bus'
                 elif ' Bicycle ' in detailString:
                         vType = 'bicycle'
-                elif ' Heavy-Duty ' in detailString:
-                        vType = 'heavyduty'
+                elif ' Car ' in detailString:
+                        vType = 'car'
                 elif ' Other ' in detailString:
                         vType = 'other'
                 else:
@@ -118,7 +123,9 @@ class RiyaSewanaScraper(ClassifiedSiteScraper.ClassifiedSiteScraper):
                 if '202' in detailString:
                         index = detailString.find("202")
                         postDate = detailString[index: index+10]
-                return postDate
+                        year, month, addate = postDate.split("-")
+                        convertedDate = date(int(year), int(month), int(addate))
+                return convertedDate
         
         #Find the city where the vehicle is in
         def findAdCity(detailString):
@@ -130,8 +137,8 @@ class RiyaSewanaScraper(ClassifiedSiteScraper.ClassifiedSiteScraper):
 
         # this function goes through the list of ads in the page
         # and returns the URL of next ad list page
-        def browseAdListPage(self, adListPageUrl):
-
+        def browseAdListPage(self, adListPageUrl, startDate, EndDate):
+                myVehicles = []
                 #first open the page,
                 page = urlopen(adListPageUrl)
                 html = page.read().decode("utf-8",'ignore')
@@ -142,17 +149,18 @@ class RiyaSewanaScraper(ClassifiedSiteScraper.ClassifiedSiteScraper):
                         singlePageLink = tag.find('a')
                         pageURL = singlePageLink.get('href')
 
+                        print("     " + pageURL)
                         aVehicle = self.extractVehicleData(pageURL)
-                        self.myVehicles.append(aVehicle)
-                        print(aVehicle)
-                        break
+                        myVehicles.append(aVehicle)
+                        
+                        #break
 
                 #Find the next page
                 nextTag = soup.find('a', string="Next")
                 nextURL = None
                 if nextTag:
                        nextURL = "https:" + nextTag['href']
-                return nextURL
+                return nextURL, myVehicles
         
         #go through the entire site and pull all the ads
         def traverseSite(self):
@@ -160,6 +168,59 @@ class RiyaSewanaScraper(ClassifiedSiteScraper.ClassifiedSiteScraper):
                 #start with first page
                 page = self.siteUrl
                 while page != None:
-                        page = self.browseAdListPage(page)
+                        page, vehicleList = self.browseAdListPage(page)
+
+        def traverseSiteFrontToBack(self):
+               Yesterday = date.today() - timedelta(days=1)
+               latestSavedAdDate = self.dataSource.getLastClassifiedDate()
+
+               #start with first page
+               page = self.siteUrl
+               while page != None:
+                        page, vehicleList = self.browseAdListPage(page, startDate=Yesterday, EndDate=latestSavedAdDate)
+                        for item in vehicleList:
+                                #if item.date > Yesterday:
+                                # continue
+                                if item.date > latestSavedAdDate:
+                                  print(item)
+                                  writeStatus = self.dataSource.writeToDataSource(item)
+                                  if writeStatus == None or writeStatus == 'duplicate':
+                                         continue
+                                  return writeStatus
+                                else:
+                                      return 'Finished'
+                                
+        def traverseSiteBackToFront(self):
+               Yesterday = date.today() - timedelta(days=1)
+               latestSavedAdDate = self.dataSource.getLastClassifiedDate()
+
+               #start with last page
+               # page number is hard coded,
+               urlWithNoPageNum = "https://riyasewana.com/search?page="
+               pageNum = 1589
+               page = urlWithNoPageNum+str(pageNum)
+               while page != None:
+                        print(page)
+                        page, vehicleList = self.browseAdListPage(page, startDate=Yesterday, EndDate=latestSavedAdDate)
+                        for item in vehicleList:
+                                if item.date > Yesterday:
+                                 return 'Finished'
+                                if item.date > latestSavedAdDate:
+                                  print(item)
+                                  writeStatus = self.dataSource.writeToDataSource(item)
+                                  if writeStatus == None or writeStatus == 'duplicate':
+                                         continue
+                                  return writeStatus
+                                else:
+                                       continue
+                                
+                        pageNum -= 1
+                        page = urlWithNoPageNum + str(pageNum)
+                        if pageNum < 1: 
+                               page = None
+
+                               
+                                  
+
                         
         

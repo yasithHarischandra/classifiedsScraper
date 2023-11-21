@@ -1,6 +1,6 @@
 class Vehicle:
         def __init__(self, type, make, model, year, mileage, adURL, transmission, 
-                     fuelType, engineCC, options, details, date, city, price, contactNo):
+                     fuelType, engineCC, startType, options, details, date, city, price, contactNo):
                 self.type = type
                 self.make = make
                 self.model = model
@@ -10,6 +10,7 @@ class Vehicle:
                 self.transmission = transmission
                 self.fuel = fuelType
                 self.engineCapacity = engineCC
+                self.startType = startType
                 self.options = options
                 self.details = details
                 self.date = date

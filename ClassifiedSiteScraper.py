@@ -1,9 +1,9 @@
 
+import persistence
 class ClassifiedSiteScraper:
         siteUrl = ''
-        def __init__(self):
-                
-                self.myVehicles = []
+        def __init__(self, dataSource):
+                self.dataSource = dataSource
 
         def findVehicleType(detailString):
                 pass

@@ -1,5 +1,6 @@
 
 --Following queries are for creating the required tables
+DROP TABLE IF EXISTS classifieds.vehicle_ad;
 CREATE TABLE classifieds.vehicle_ad (
 	vehicle_ad_id SERIAL PRIMARY KEY,
 	vehicle_type_id INT NOT NULL,
@@ -20,31 +21,36 @@ CREATE TABLE classifieds.vehicle_ad (
 	vehicle_ad_contactno VARCHAR(15)
 );
 
+DROP TABLE IF EXISTS classifieds.vehicle_type;
 CREATE TABLE classifieds.vehicle_type (
 	vehicle_type_id SERIAL PRIMARY KEY,
-	vehicle_type VARCHAR(15) UNIQUE NOT NULL
+	vehicle_type VARCHAR(20) UNIQUE NOT NULL
 );
 
+DROP TABLE IF EXISTS classifieds.vehicle_maker;
 CREATE TABLE classifieds.vehicle_maker (
 	vehicle_maker_id SERIAL PRIMARY KEY,
-	vehicle_maker VARCHAR(20) UNIQUE NOT NULL,
-	vehicle_maker_country VARCHAR(20)
+	vehicle_maker VARCHAR(50) UNIQUE NOT NULL,
+	vehicle_maker_country VARCHAR(50)
 );
 
+DROP TABLE IF EXISTS classifieds.vehicle_model;
 CREATE TABLE classifieds.vehicle_model (
 	vehicle_model_id SERIAL PRIMARY KEY,
-	vehicle_model VARCHAR(20) UNIQUE NOT NULL,
+	vehicle_model VARCHAR(50) UNIQUE NOT NULL,
 	vehicle_maker_id INT
 );
 
+DROP TABLE IF EXISTS classifieds.district;
 CREATE TABLE classifieds.district (
 	district_id SERIAL PRIMARY KEY,
 	district VARCHAR(30) UNIQUE NOT NULL
 );
 
+DROP TABLE IF EXISTS classifieds.city;
 CREATE TABLE classifieds.city (
 	city_id SERIAL PRIMARY KEY,
-	city VARCHAR(30) UNIQUE NOT NULL,
+	city VARCHAR(50) UNIQUE NOT NULL,
 	district_id INT
 );
 

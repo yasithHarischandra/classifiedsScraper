@@ -1,3 +1,6 @@
+--schema
+DROP SCHEMA IF EXISTS classifieds CASCADE;
+CREATE SCHEMA classifieds;
 
 --Following queries are for creating the required tables
 DROP TABLE IF EXISTS classifieds.vehicle_ad;
@@ -7,18 +10,18 @@ CREATE TABLE classifieds.vehicle_ad (
 	vehicle_maker_id INT NOT NULL,
 	vehicle_model_id INT NOT NULL,
 	vehicle_ad_year INT,
-	vehicle_ad_mileage INT,
+	vehicle_ad_mileage VARCHAR(20),
 	vehicle_ad_transmission VARCHAR(20),
 	vehicle_ad_fuel_type VARCHAR(20),
-	vehicle_ad_engine_capacity INT,
+	vehicle_ad_engine_capacity VARCHAR(20),
 	vehicle_ad_start_type VARCHAR(20),
-	vehicle_ad_options TEXT,
-	vehicle_ad_details TEXT,
-	vehicle_ad_price VARCHAR(20),
+	vehicle_ad_price TEXT,
 	vehicle_ad_url TEXT UNIQUE NOT NULL,
 	vehicle_ad_date DATE NOT NULL,
 	city_id INT NOT NULL,
-	vehicle_ad_contactno VARCHAR(15)
+	vehicle_ad_contactno VARCHAR(15),
+	vehicle_ad_options TEXT,
+	vehicle_ad_details TEXT
 );
 
 DROP TABLE IF EXISTS classifieds.vehicle_type;

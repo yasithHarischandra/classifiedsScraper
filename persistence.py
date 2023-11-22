@@ -104,18 +104,20 @@ class postgresqlPersistence(databasePersistence):
             print('Database connection closed.')
 
     def getLastClassifiedDate(self):
-        sql = """SELECT MAX(vehicle_ad_date)
-                 FROM classifieds.vehicle_ad"""
+        sql = """SELECT vehicle_ad_date
+                 FROM classifieds.vehicle_ad
+                 ORDER BY vehicle_ad_date DESC
+                 LIMIT 1;"""
         latestDate = None
         try:
             cur = self.conn.cursor()
             cur.execute(sql)
-            latestDate, _ = cur.fetchone()
+            latestDate = cur.fetchone()
         except (Exception, psycopg2.DatabaseError) as error:
             print(error)
         if latestDate == None:
-            latestDate = date.today() - timedelta(weeks=520)
-        return latestDate
+            latestDate[0] = date.today() - timedelta(weeks=520)
+        return latestDate[0]
 
     def getCityId(self, city):
         insertSql = """INSERT INTO classifieds.city(city) 

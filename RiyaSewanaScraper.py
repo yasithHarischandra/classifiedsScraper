@@ -35,18 +35,25 @@ class RiyaSewanaScraper(ClassifiedSiteScraper.ClassifiedSiteScraper):
                 vehicleType = RiyaSewanaScraper.findVehicleType(singleAdSoup.h1.text)
                 adPostDate = RiyaSewanaScraper.findAdDate(singleAdSoup.h2.text)
                 adCity = RiyaSewanaScraper.findAdCity(singleAdSoup.h2.text)
-                contact, price = getRowProperties(2)
+
+                #Search for the row where contact no and price is in
+                contactRowIndex = 0
+                for row in tableRows:
+                       if row.find_all('td')[0].text == 'Contact':
+                             break
+                       contactRowIndex += 1 
+                contact, price = getRowProperties(contactRowIndex)
 
                 #We do not want bicycles:
                 if vehicleType == 'bicycle' or vehicleType == 'heavyduty':
                     return None
                 
-                makeRowIndex = 4
+                makeRowIndex = contactRowIndex+1
 
                 #Check if the 5th row is leasing ad, if it is not, data starts from 4th row
-                fifthRowLabel, _ =  getRowProperties(makeRowIndex, getLeftnRight=False)
-                if fifthRowLabel != 'Get Leasing':
-                       makeRowIndex -= 1
+                fifthRowLabel =  tableRows[makeRowIndex].find_all('td')[0].text
+                if fifthRowLabel == 'Get Leasing':
+                       makeRowIndex += 1
                 
                 #if vehicleType == 'heavyduty' or vehicleType == 'tractor' or vehicleType == 'lorry' or vehicleType == 'other' or vehicleType == 'crewcab' or vehicleType == 'bus':
                 #    makeRowIndex -= 1
@@ -121,18 +128,19 @@ class RiyaSewanaScraper(ClassifiedSiteScraper.ClassifiedSiteScraper):
         def findAdDate(detailString):
                 postDate = ''
                 if '202' in detailString:
-                        index = detailString.find("202")
-                        postDate = detailString[index: index+10]
+                        index = detailString.find("on 2023")
+                        postDate = detailString[index+3: index+13]
                         year, month, addate = postDate.split("-")
                         convertedDate = date(int(year), int(month), int(addate))
                 return convertedDate
         
         #Find the city where the vehicle is in
         def findAdCity(detailString):
-                postDate = ''
-                if '202' in detailString:
-                        index = detailString.find(",")
-                        town = detailString[index+2: ]
+                postDateIndex = detailString.find("202")
+                if  postDateIndex > 0:
+                        subStr = detailString[postDateIndex:]
+                        index = subStr.find(",")
+                        town = subStr[index+2: ]
                 return town
 
         # this function goes through the list of ads in the page
@@ -151,7 +159,8 @@ class RiyaSewanaScraper(ClassifiedSiteScraper.ClassifiedSiteScraper):
 
                         print("     " + pageURL)
                         aVehicle = self.extractVehicleData(pageURL)
-                        myVehicles.append(aVehicle)
+                        if aVehicle != None:
+                                myVehicles.append(aVehicle)
                         
                         #break
 
@@ -173,6 +182,10 @@ class RiyaSewanaScraper(ClassifiedSiteScraper.ClassifiedSiteScraper):
         def traverseSiteFrontToBack(self):
                Yesterday = date.today() - timedelta(days=1)
                latestSavedAdDate = self.dataSource.getLastClassifiedDate()
+
+               if latestSavedAdDate == Yesterday:
+                      print("Database is up to date to yesterday!.")
+                      return 'Finished'
 
                #start with first page
                page = self.siteUrl
@@ -197,7 +210,7 @@ class RiyaSewanaScraper(ClassifiedSiteScraper.ClassifiedSiteScraper):
                #start with last page
                # page number is hard coded,
                urlWithNoPageNum = "https://riyasewana.com/search?page="
-               pageNum = 1589
+               pageNum = 278
                page = urlWithNoPageNum+str(pageNum)
                while page != None:
                         print(page)

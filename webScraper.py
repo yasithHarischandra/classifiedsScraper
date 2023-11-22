@@ -11,7 +11,7 @@ myrsScraper = RiyaSewanaScraper.RiyaSewanaScraper(dataSource)
 myrsScraper.traverseSiteFrontToBack()
 #myrsScraper.traverseSiteBackToFront()
 
-#myrsScraper.extractVehicleData("https://riyasewana.com/buy/isuzu-car-carrier-sale-colombo-6842177")
+#myrsScraper.extractVehicleData("https://riyasewana.com/buy/mitsubishi-canter-sale-mulleriyawa-7223998")
 
 dataSource.closeDataSource()
 

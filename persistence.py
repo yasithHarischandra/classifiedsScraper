@@ -108,15 +108,14 @@ class postgresqlPersistence(databasePersistence):
                  FROM classifieds.vehicle_ad
                  ORDER BY vehicle_ad_date DESC
                  LIMIT 1;"""
-        latestDate = None
+        latestDate = [None]
         try:
             cur = self.conn.cursor()
             cur.execute(sql)
             latestDate = cur.fetchone()
         except (Exception, psycopg2.DatabaseError) as error:
             print(error)
-        if latestDate == None:
-            latestDate[0] = date.today() - timedelta(weeks=520)
+        
         return latestDate[0]
 
     def getCityId(self, city):

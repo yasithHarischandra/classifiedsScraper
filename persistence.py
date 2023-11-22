@@ -53,7 +53,7 @@ class databasePersistence(ClassifiedsPersistence):
             pass
 
     def openDataSource(self):
-            pass
+            return False
 
     def closeDataSource(self):
             pass
@@ -96,6 +96,8 @@ class postgresqlPersistence(databasePersistence):
             if self.conn is not None:
                 self.conn.close()
                 print('Database connection closed due to error.')
+            return False
+        return True
 
 
     def closeDataSource(self):

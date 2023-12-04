@@ -195,6 +195,11 @@ class RiyaSewanaScraper(ClassifiedSiteScraper.ClassifiedSiteScraper):
                                 #if item.date > Yesterday:
                                 # continue
                                 if item.date > latestSavedAdDate:
+                                  
+                                  if item.date > Yesterday:
+                                         print('Classified is too new to be added to data.')
+                                         continue
+                                  
                                   print(item)
                                   writeStatus = self.dataSource.writeToDataSource(item)
                                   if writeStatus == None or writeStatus == 'duplicate':

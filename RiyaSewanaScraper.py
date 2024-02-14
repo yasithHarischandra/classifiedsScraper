@@ -12,7 +12,11 @@ class RiyaSewanaScraper(ClassifiedSiteScraper.ClassifiedSiteScraper):
                 
 
         def extractVehicleData(self, singleAdPageUrl):
-                singleAdPage = urlopen(singleAdPageUrl)
+                try:
+                        singleAdPage = urlopen(singleAdPageUrl)
+                except:
+                       return None
+                
                 singleAdHtml = singleAdPage.read().decode("utf-8", 'replace')
                 singleAdSoup = BeautifulSoup(singleAdHtml, "html.parser")
                 #print(singleAdSoup.get_text())
@@ -128,7 +132,7 @@ class RiyaSewanaScraper(ClassifiedSiteScraper.ClassifiedSiteScraper):
         def findAdDate(detailString):
                 postDate = ''
                 if '202' in detailString:
-                        index = detailString.find("on 2023")
+                        index = detailString.find("on 202")
                         postDate = detailString[index+3: index+13]
                         year, month, addate = postDate.split("-")
                         convertedDate = date(int(year), int(month), int(addate))
